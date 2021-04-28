@@ -1,0 +1,7 @@
+{
+  "presets": ["es2015"],
+  "plugins": [["shebang", {
+    "replacement": "// #!/user/bin/node",
+    "force": true
+  }]]
+}

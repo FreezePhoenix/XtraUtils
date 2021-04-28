@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: Function.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: Function.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>'use strict';
+if ( ( 0, eval )( 'this' ).XtraUtils &amp;&amp; ( 0, eval )( 'this' ).XtraUtils.Utility ) {
+	/**
+	 * @type {Utility}
+	 * @property {function} aidsIn The Functionw class
+	 * @property {Function} aidsIn.prototype the Function prototype
+	 * @namespace
+	 * @memberof XtraUtils
+	 */
+	XtraUtils.Function = new XtraUtils.Utility( Function );
+
+	const { keys } = Object,
+		{ isArray } = Array,
+
+		rename = ( a,b )=>Function( 'fn',`return (function ${b}(){\n	return fn.apply(this, arguments)\n});` )( a );
+
+	XtraUtils.Function.addMethod( 'flow', ( function(){
+		/**
+		 * Applies functions in order of the arguments passed to `Function.flow`.
+		 * @param {...Function} functs The functions to flow. Each function should return an array of arguments to pass to the next function, or a single value.
+		 * @returns {Function} The resulting built function.
+		 * @memberof XtraUtils.Function.
+		 * @example
+		 * function add(a,b) { return a + b };
+		 * function square(a) { return a ** 2};
+		 * addSquare = Function.flow(add, sqaure);
+		 * addSquare(1,2);		// 9
+		 */
+		function flow( ...functs ) {
+			return rename( function(){
+				let args = arguments, value = undefined;
+				functs.forEach( ( funct, _ ) => {
+					value = funct( ...args );
+					args = [isArray( value ) ? [...value] : value];
+				} );
+				return value;
+			}, 'flowed' );
+		}
+		return flow;
+	} )() );
+
+	XtraUtils.Function.addMethod( 'reArg', ( function(){
+		const _toString = Object.prototype.toString,
+			_isNumber = val => typeof val === 'number',
+			_reOrg = ( a,c )=>{let b = Array( a.length ).fill();a.forEach( ( a,d )=>{b[c[d]] = a;} );return b;},
+			_regularize = ( a )=>{let b = [];if( '[object Array]' === _toString.call( a ) ){return a;}keys( a ).filter( _isNumber ).forEach( ( c )=>{b[c] = a[c];} );return b;};
+		/**
+		 * Re-arranges the arguments to a function.
+		 * @param {Function} fn The function to remap the arguments.
+		 * @param {Array.&lt;number>|Object&lt;number,number>} indexes The way to map the arguments.
+		 * @param {Object} [context=null] The context to set the `this` value to.
+		 * @returns {Function} The resulting re-mapped function!
+		 * @memberof XtraUtils.Function.
+		 * @example
+		 * function j(a,b,c) { return `${a}+${b}+${c}` };
+		 * j = Function.reArg(j, [2, 1, 0])
+		 * j(1,2,3);						 // '3+2+1'
+		 */
+		function reArg( fn, indexes, context = null ) {
+			let func = fn.bind( context );
+			indexes = _regularize( indexes );
+			return rename( function( ...args ) {
+				return func( ..._reOrg( args,indexes ) );
+			}, fn.name );
+		}
+		return reArg;
+	} )() );
+
+	XtraUtils.Function.addMethod( 'template', ( function(){
+		const _toString = Object.prototype.toString,
+			_isNumber = val => typeof val === 'number',
+			_reOrg = ( c,a,d )=>{let b = [...c];a = [...a];d.forEach( ( c,d )=>{b.splice( c,1,a[d] );a.shift();} );b.splice( b.length,0,...a );return b;},
+			_regularize = ( a )=>{let b = [];if( '[object Array]' === _toString.call( a ) ){return a;}keys( a ).filter( _isNumber ).forEach( ( c )=>{b[c] = a[c];} );return b;};
+		/**
+		 * Templates a function, enabling you to set static arguments and placeholders.
+		 * @param {Function} fn The function to template.
+		 * @param {Object} [context=null] The context to operate the function under.
+		 * @param {...*} BoundArgs The arguments to revert to static, use '_PH_' for placeholders.
+		 * @returns {Function} The resulting function.
+		 * @memberof XtraUtils.Function.
+		 * @example
+		 * function j(a,b,c) { return a + '+' + b + '+' + c };
+		 * j = Function.template(j, null, 3, '_PH_', 2);
+		 * j(4);		// '3+4+2'
+		 * j(8);		// '3+8+2'
+		 */
+		function template( fn, context = null, ...BoundArgs ) {
+			const func = fn.bind( context ),
+				placeholders = [],
+				indexes = [];
+			BoundArgs.forEach( ( item, index ) => {
+				if( item === '_PH_' ) {
+					placeholders.push( index );
+				}
+			} );
+			return rename( function( ...args ) {
+				return func( ..._reOrg( BoundArgs, args, placeholders ) );
+			}, fn.name );
+		}
+		return template;
+	} )() );
+
+	XtraUtils.Function.addMethod( 'capArgs', ( function(){
+		/**
+		 * Limits the number of arguments that can be used by a function.
+		 * @param {Function} fn The function to cap the number of arguments on.
+		 * @param {number} [cap=fn.length] The cap of the number of args.
+		 * @param {Object} [context=null] The context to run the function on.
+		 * @returns {Function} The function with arguments capped.
+		 * @memberof XtraUtils.Function.
+		 * @example
+		 * function j(a,b,c) { return a + '+' + b + '+' + 'c' };
+		 * j = Function.capArgs(j, 2);
+		 * j(1,2,3);		// '1+2+undefined'
+		 */
+		function capArgs( fn, cap = fn.length, context = null ) {
+			const func = fn.bind( context );
+			return rename( function( ...args ) {
+				args.length = cap;
+				return func( ...args );
+			}, fn.name );
+		}
+		return capArgs;
+	} )() );
+
+	XtraUtils.Function.addMethod( 'memoize', ( function(){
+		/**
+		 * Caches the result. Should only be used on pure functions, which return the same result for the same input.
+		 * @param {Function} fn The function to cache.
+		 * @param {Object} [context=null] The context to operate in.
+		 * @returns {Function} The resulting function.
+		 * @memberof XtraUtils.Function.
+		 */
+		function memoize( fn, context = null ){
+			//======================================================
+			// Many thanks to @ConorO'Brien for allowing me to use.
+			// The file this is used from is located here:
+			// https://github.com/ConorOBrien-Foxx/ffuncs/blob/master/backend/memoize.js
+			// github profile located here:
+			// https://github.com/ConorOBrien-Foxx
+			//======================================================
+			const func = fn.bind( context );
+			let mem = new Map();
+			return rename( function( ...args ) {
+				return (
+					!mem.has( args.join( ',' ) ) &amp;&amp; mem.set( args.join( ',' ), func( ...args ) ),
+					mem.get( args.join( ',' ) )
+				);
+			}, fn.name );
+		}
+		return memoize;
+	} )() );
+
+	XtraUtils.Function.addMethod( 'throttle', ( function(){
+		/**
+		 * Delayes the execution of a function. You call it with the normal arguments you would. If you don't wait until the timout expires, this also works as a debounce method.
+		 * @param {Function} fn The function to throttle.
+		 * @param {number} time The delay to execute the function after.
+		 * @param {Object} [context=null] What context to execute under.
+		 * @returns {Function} The throttled function.
+		 * @memberof XtraUtils.Function.
+		 */
+		function throttle( fn, time, context = null ){
+			const func = fn.bind( context );
+			let timeout = -1;
+			return rename( function( ...args ) {
+				clearTimeout( timeout );
+				timeout = setTimeout( () => {
+					func( ...args );
+				}, time );
+			}, fn.name );
+		}
+		return throttle;
+	} )() );
+
+	XtraUtils.Function.addMethod( 'curry', ( function(){
+		//======================================================
+		// Many thanks to @ConorO'Brien for allowing me to use.
+		// The file this is used from is located here:
+		// https://github.com/ConorOBrien-Foxx/ffuncs/blob/master/backend/curry.js
+		//======================================================
+		const currier = ( fn, arity = fn.length, context = null ) => {
+			const func = fn.bind( context );
+			args = [];
+			let _rec = ( ...a ) => {
+				args.push( ...a );
+				if ( args.length === arity ) {
+					return func( ...args );
+				} else {
+					( ...n ) => _rec( ...n );
+				}
+			};
+			return ( ...n ) => _rec( ...n );
+		};
+		/**
+		 * Allows the function to be called many times, before executing.
+		 * @param {Function} fn The function to curry.
+		 * @param {number} [arity=fn.length] The number of arguments to execute it at.
+		 * @param {Object} [context=null] The context to execute in.
+		 * @returns {Function} The curried function.
+		 * @memberof XtraUtils.Function.
+		 * @example
+		 * function j(a,b,c) { return [a,b,c] };
+		 * j = Function.curry(j);
+		 * j(1,2)(3);		// [1,2,3]
+		 * j(1)(2,3);		// [1,2,3]
+		 * j(1)(2)(3);	 // [1,2,3]
+		 */
+		function curry( fn, arity = fn.arity ){
+			return rename( currier( fn, arity ), fn.name );
+		}
+		return curry;
+	} )() );
+
+	XtraUtils.Function.addUtil( 'once', ( function(){
+		/**
+		 * Restricts the execution of a function to one call. Note this does not change the original function.
+		 * @param {Function} fn The function to limit.
+		 * @param {Object} [context=null] The context to use.
+		 * @returns {Function} The restricted function.
+		 * @memberof XtraUtils.Function.
+		 * @example
+		 * function k(a) { return a };
+		 * k = Function.once(k);
+		 * k(3);		// 3
+		 * k(4);		// 4
+		 */
+		function once( fn, context = null ) {
+			const func = fn.bind( context );
+			called = 0, result = null;
+			return rename( function( ...args ) {
+				result = called === 1 ? result : func( ...args );
+				called |= 1;
+				return result;
+			}, fn.name );
+		}
+	} )() );
+
+	XtraUtils.Function.addMethod( 'afterNCalls', ( function(){
+		/**
+		 * Returns a function that doesn't execute unless called `n` or more times.
+		 * @param {Function} callback The function to restrict.
+		 * @param {number} n The number that determines how many times to wait.
+		 * @param {Object} [context=null] The context to operate thome.
+		 * @returns {Function} The restricted function.
+		 * @memberof Xtrautils.Function.
+		 */
+		function afterNCalls( callback, n, context = null ) {
+			let func = callback.bind( context ),
+				calls = 0;
+			return ( ...args ) => {
+				if( calls++ >= times ) {
+					return func( ...args );
+				}
+			};
+		}
+		return afterNCalls;
+	} )() );
+
+} else {
+	console.warn( 'XtraUtils is not defined. For more details, please visit ' +
+						   'https://github.com/FreezePhoenix/XtraUtils/. If your issue still occurs, submit an issue here:' +
+						   'https://github.com/FreezePhoenix/XtraUtils/issues/new' );
+}
+/**
+ * Used to denote that the function has been modified, and may not be a pure function.
+ * @alias ModifiedFunction
+ * @typedef {Function} ModifiedFunction
+ * @memberof XtraUtils.Function.
+ */</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Branch.html">Branch</a></li><li><a href="Fragment.html">Fragment</a></li><li><a href="Leaf.html">Leaf</a></li><li><a href="Matrix.html">Matrix</a></li><li><a href="Pool.html">Pool</a></li><li><a href="Queue.html">Queue</a></li><li><a href="SealedArray.html">SealedArray</a></li><li><a href="SizeLimitedStack.html">SizeLimitedStack</a></li><li><a href="Stack.html">Stack</a></li><li><a href="Tree.html">Tree</a></li><li><a href="TypedSizeLimitedStack.html">TypedSizeLimitedStack</a></li><li><a href="TypedStack.html">TypedStack</a></li><li><a href="Vector.html">Vector</a></li><li><a href="XtraUtils.Utility.html">Utility</a></li></ul><h3>Namespaces</h3><ul><li><a href="Testers.html">Testers</a></li><li><a href="XtraUtils.html">XtraUtils</a></li><li><a href="XtraUtils.Array.html">Array</a></li><li><a href="XtraUtils.Boolean.html">Boolean</a></li><li><a href="XtraUtils.Function.html">Function</a></li><li><a href="XtraUtils.Number.html">Number</a></li><li><a href="XtraUtils.Object.html">Object</a></li><li><a href="XtraUtils.String.html">String</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sun Aug 19 2018 20:23:30 GMT+0500 (+05)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

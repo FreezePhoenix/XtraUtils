@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: SealedArray.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: SealedArray.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>'use strict';
+const SealedArray = ( function(){
+	let { setPrototypeof, assign, seal } = Object;
+	/**
+   * A class for those pedantic people who can't stand dynamic memory allocation. This class gives you a fixed length array. Every method that would in the case of a normal array push items off the other end.
+   * @class
+   * @extends Array
+	 */
+	class SealedArray extends Array {
+		/**
+		 * Constructs a new SealedArray. Argument format is the same as that of `Array`.
+		 * @constructs SealedArray
+		 * @param {...*} args The arguments to pass to Array.
+		 */
+		constructor( ...args ) {
+			super( ...args );
+			args.length === 1 &amp;&amp; this.fill();
+			seal( this );
+		}
+		/**
+		 * Pushes item(s) to the end of the array. Items that overflow the beginning are removed from the array.
+		 * @param {...*} args The items to push to the end of the array.
+		 * @returns {number} The length of the array.
+		 */
+		push( ...args ) {
+			let self = this.toNativeArray();
+			args.forEach( item => {
+				self.shift();
+				self.push( item );
+			} );
+			this.propogate( self );
+			return this.length;
+		}
+		/**
+		 * Pushes items to the beginning of the array. Items that overflow the end are removed.
+		 * @param {...*} args The items to prepend at the start of the array.
+		 * @returns {number} The length of the array.
+		 */
+		unshift( ...args ) {
+			let self = this.toNativeArray();
+			args.forEach( ( item ) => {
+				self.pop();
+				self.unshift( item );
+			} );
+			this.propogate( self );
+			return this.length;
+		}
+		/**
+		 * Removes the last item at the end of the array, and puts `undefined` onto the beginning.
+		 * @returns {*} The item that was at the end of the array.
+		 */
+		pop() {
+			let self = this.toNativeArray();self.unshift( undefined );
+			console.log( self );
+			let arr = assign( [],self );
+			arr.pop();
+			console.log( arr );
+			this.propogate( arr );
+			return self.pop();
+		}
+		/**
+		 * The SealedArray equivalent of `Array.prototype.filter`.
+		 * @param {ArrayCallback} fn The callback to iterate on.
+		 * @returns {SealedArray} The filtered array
+		 */
+		filter( fn = ( ..._ )=>{return false;} ) {
+			return setPrototypeOf( this.toNativeArray().filter( fn ), this.__proto__ );
+		}
+		/**
+		 * Removes the first item in the array, and pushes `undefined` onto the end.
+		 * @returns {*} The item that was at the start of the array.
+		 */
+		shift() {
+			let self = this.toNativeArray(),
+				arr = assign( [], self );
+			arr.shift();
+			this.propogate( arr );
+			return self.shift();
+		}
+		propogate( array ) {
+			array.length = this.length;
+			this.fill();
+			Object.assign( this, array );
+			return this;
+		}
+		/**
+		 * Returns a shallow duplicate of the array.
+		 * @returns {SealedArray} The shallow clone.
+		 */
+		clone() {
+			return setPrototypeof( this.toNativeArray(), this.__proto__ );
+		}
+		toNativeArray() {
+			return Object.assign( [], this );
+		}
+		/**
+		 * The SealedArray equivalent of `Array.prototype.map`.
+		 * @param {ArrayCallback} fn The function to map the array with.
+		 * @returns {SealedArray} The mapped array.
+		 */
+		map( fn ) {
+			return new SealedArray( ...[...this].map( fn ) );
+		}
+		get [Symbol.species]() { return SealedArray; }
+	}
+
+	return SealedArray;
+} )();
+if( ( 0, eval )( 'this' ).XtraUtils &amp;&amp; ( 0, eval )( 'this' ).XtraUtils.Utility ) {
+	XtraUtils.SealedArray = new XtraUtils.Utility( SealedArray );
+} else {
+	console.warn( 'XtraUtils is not defined. For more details, please visit ' +
+						   'https://github.com/FreezePhoenix/XtraUtils/. If your issue still occurs, submit an issue here:' +
+						   'https://github.com/FreezePhoenix/XtraUtils/issues/new' );
+}
+/**
+ * @callback ArrayCallback
+ * @param {*} item The item.
+ * @param {number} index The index of the item in the array.
+ * @param {Array} array The array being mapped.
+ * @returns {*} The result.
+ * @memberof SealedArray
+ * @alias ArrayCallback
+ */</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Branch.html">Branch</a></li><li><a href="Fragment.html">Fragment</a></li><li><a href="Leaf.html">Leaf</a></li><li><a href="Matrix.html">Matrix</a></li><li><a href="Pool.html">Pool</a></li><li><a href="Queue.html">Queue</a></li><li><a href="SealedArray.html">SealedArray</a></li><li><a href="SizeLimitedStack.html">SizeLimitedStack</a></li><li><a href="Stack.html">Stack</a></li><li><a href="Tree.html">Tree</a></li><li><a href="TypedSizeLimitedStack.html">TypedSizeLimitedStack</a></li><li><a href="TypedStack.html">TypedStack</a></li><li><a href="Vector.html">Vector</a></li><li><a href="XtraUtils.Utility.html">Utility</a></li></ul><h3>Namespaces</h3><ul><li><a href="Testers.html">Testers</a></li><li><a href="XtraUtils.html">XtraUtils</a></li><li><a href="XtraUtils.Array.html">Array</a></li><li><a href="XtraUtils.Boolean.html">Boolean</a></li><li><a href="XtraUtils.Function.html">Function</a></li><li><a href="XtraUtils.Number.html">Number</a></li><li><a href="XtraUtils.Object.html">Object</a></li><li><a href="XtraUtils.String.html">String</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sun Aug 19 2018 20:23:30 GMT+0500 (+05)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+language: node_js
+node_js:
+ - 6
+services:
+ - docker
+before_install:
+ - bash ./.build.sh 0
+install: true

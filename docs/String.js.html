@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: String.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: String.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>'use strict';
+if ( ( 0, eval )( 'this' ).XtraUtils &amp;&amp; ( 0, eval )( 'this' ).XtraUtils.Utility ) {
+	/**
+   * @type {Utility}
+   * @property {function} aidsIn The String class
+   * @property {Object} aidsIn.prototype the String prototype
+   * @namespace
+   * @memberof XtraUtils
+   */
+	XtraUtils.String = new XtraUtils.Utility( String );
+	const { min, ceil, round, random, pow } = Math,
+
+		words = str => str.match( /((?:^_*)?(?:[A-Z][-_A-Z]*|[^-\s_A-Z]+)(?:_*$)?)/gi ),
+		repeat = ( string, times ) => somethinghacky.call( string, ceil( times ) ).slice( 0, Math.round( times * string.length ) ),
+
+		toUpperCase = str => ''.toUpperCase.call( str ),
+		toLowerCase = str => ''.toLowerCase.call( str ),
+		somethinghacky = XtraUtils.String.aidsIn.prototype.repeat;
+
+	XtraUtils.String.addMethod( 'generateRandom', ( function(){
+		function generateRandom( len = 7 ) {
+			return ( random() * pow( 36, len ) ).toString( 36 ).split( '.' )[0];
+		}
+	} )() );
+
+	XtraUtils.String.addUtil( 'reverse', ( function(){
+		/**
+		 * Reverses a string
+		 * @returns {string} The reversed string.
+		 * @memberof XtraUtils.String#
+		 */
+		function reverse(){
+			return this.split( '' ).reverse().join( '' );
+		}
+		return reverse;
+	} )() );
+
+	XtraUtils.String.addUtil( 'sort', ( function(){
+		/**
+		 * Sorts a string by character.
+		 * @param {CallBack} [sortFunction=(str1,str2)=>{return str1.charCodeAt(0) - str2.charCodeAt(0)}] The function to sort it with. By default, it sorts by character code.
+		 * @returns {string} The sorted string.
+		 * @memberof XtraUtils.String#
+		 */
+		function sort( sortFunction = ( str1,str2 )=>{return str1.charCodeAt( 0 ) - str2.charCodeAt( 0 );} ){
+			return this.split( '' ).sort( sortFunction ).join( '' );
+		}
+		return sort;
+	} )() );
+
+	XtraUtils.String.addMethod( 'rot13', ( function(){
+		const translate = x => index( x ) > -1 ? output[index( x )] : x,
+			index = x => input.indexOf( x ),
+			input = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
+			output = 'NOPQRSTUVWXYZABCDEFGHIJKLMnopqrstuvwxyzabcdefghijklm';
+		/**
+		 * Reverses the famous rot13 cipher.
+		 * @param {string} str The string to perform rot13 on.
+		 * @returns {string} The de-ciphered string.
+		 * @memberof XtraUtils.String.
+		 */
+		return function rot13( str ) {
+			return str.split( '' ).map( translate ).join( '' );
+		};
+		return rot13;
+	} )() );
+
+	XtraUtils.String.addMethod( 'levenshtein', ( function(){
+		const last = arr => arr[arr.length - 1];
+		/**
+		 * Finds the [Levenshtein distance]{@link https://en.wikipedia.org/wiki/Levenshtein_distance} between a string and another string.
+		 * @param {string} str1 The first string to find the distance between.
+		 * @param {string} str2 The second string.
+		 * @returns {number} The Levenshtein distance.
+		 * @memberof XtraUtils.String.
+		 */
+		function levenshtein( str1, str2 ){
+			let charArr1 = str1.split( '' ),
+				charArr2 = str2.split( '' ),
+				Vector0 = [],
+				Vector1 = [],
+				deletionCost, insertionCost, substitutionCost;
+			charArr2.forEach( ( _,index ) => {
+				Vector0[index] = index;
+			} );
+			charArr1.forEach( ( item1, index1 ) => {
+				if( item1 !== last( charArr1 ) ) {
+					Vector1[0] = index1 + 1;
+					charArr2.forEach( ( item2, index2 ) => {
+						deletionCost = Vector0[index2 + 1] + 1;
+						insertionCost = Vector1[index2] + 1;
+						if( charArr1[index2] === charArr2[index2] ) {
+							substitutionCost = Vector0[index2];
+						} else {
+							substitutionCost = Vector0[index2] + 1;
+						}
+						Vector1[index2 + 1] = min( deletionCost,insertionCost,substitutionCost );
+					} );
+					const temp1 = Vector1,
+						temp2 = Vector0;
+					Vector0 = temp1;
+					Vector1 = temp2;
+				}
+			} );
+			return Vector0[charArr2.length - 1];
+		}
+		return levenshtein;
+	} )() );
+
+	XtraUtils.String.addUtil( 'words', ( function(){
+		/**
+		 * Finds the words in a string, per the following regex:
+		 * ````javascript
+		 * /((?:^_*)?(?:[A-Z][-_A-Z]*|[^-\s_A-Z]+)(?:_*$)?)/gi
+		 * ````.
+		 * @returns {Array.&lt;string>} The words.
+		 * @memberof XtraUtils.String#
+		 */
+		function words() {
+			/*
+				 This regex is to match all words in the string
+
+				/((?:^_*)?(?:[A-Z][-_A-Z]*|[^-\s_A-Z]+)(?:_*$)?)/gi  : Regex to match words
+				 ((?:^_*)?(?:[A-Z][-_A-Z]*|[^-\s_A-Z]+)(?:_*$)?)		 : Main group
+				  (?:^_*)																						: Match all '_' in the string, non-capturing
+				  (?:   )																						: Non-capturing
+						 ^																						   : Position at start of string
+						  _*																						 : Match '_' as many times as needed
+				  (		 )?																				   : Match this group between 0 and 1 times, giving back as needed
+								  (?:[A-Z][-_A-Z]*|[^-\s_A-Z]+)						  : Find all matches for letters A-Z and anything that is not a space
+								  (?:												 )						  : Non-capturing
+										 [A-Z]																   : Match the characters A-Z
+												  [-_A-Z]*												   : Match the characters A-Z, hyphen, and underscore as many times as needed
+																  |												  : Regex OR
+																   [^-\s_A-Z]+						   : Match anything that is not a space or a letter or a hyphen or an underscore
+																						  (?:_*$)?		   : Match underscore as many times as needed at the end of the string but only count as one match
+																						  (?:   )				: Non-capturing
+																								 _*				  : Match underscore as many times as needed
+																								   $				 : Match at end of string
+																						  (		 )?		   : Match this group only once
+																										   gi		: Global and case-Insesensitive flags
+		  */
+			return this.match( /((?:^_*)?(?:[A-Z][-_A-Z]*|[^-\s_A-Z]+)(?:_*$)?)/gi );
+		}
+		return words;
+	} )() );
+
+	XtraUtils.String.addUtil( 'toCamelCase', ( function(){
+		/**
+		 * Converts the string to camelCase.
+		 * @returns {string} The camelCase form of the string.
+		 * @memberof XtraUtils.String#
+		 * @example
+		 * // returns 'myCat'
+		 * let str = 'my cat';
+		 * str.toCamelCase();
+		 */
+		function toCamelCase() {
+			return words( this )
+				.map( function( _ ) { return _.replace( /^./, function( match ) { return toUpperCase( match ); } );} )
+				.join( '' )
+				.replace( /^./, function( match ) { return toLowerCase( match ); } );
+		}
+		return toCamelCase;
+	} )() );
+	XtraUtils.String.addUtil( 'ToPascalCase', ( function(){
+		/**
+		 * Converts the string to PascalCase.
+		 * @returns {string} The PascalCase form of the string.
+		 * @memberof XtraUtils.String#
+		 * @example
+		 * // returns 'MyCat'
+		 * let str = 'my cat';
+		 * str.ToPascalCase();
+		 */
+		function ToPascalCase() {
+			return words( this )
+				.map( function( _ ) { return _.replace( /^./, function( match ) { return toUpperCase( match ); } );} )
+				.join( '' );
+		}
+		return ToPascalCase;
+	} )() );
+	XtraUtils.String.addUtil( 'to_snake_case', ( function(){
+		/**
+		 * Converts the string to snake_case.
+		 * @returns {string} The snake_case form of the string.
+		 * @memberof XtraUtils.String#
+		 * @example
+		 * // returns 'my_cat'
+		 * let str = 'my cat';
+		 * str.to_snake_case();
+		 */
+		function to_snake_case() {
+			return words( this )
+				.map( function( _ ) { return _.replace( /^./, function( match ) { return toLowerCase( match ); } );} )
+				.join( '_' );
+		}
+		return to_snake_case;
+	} )() );
+	XtraUtils.String.addUtil( 'TO_CONSTANT_CASE', ( function(){
+		/**
+		 * Converts the string to CONSTANT_CASE.
+		 * @returns {string} The CONSTANT_CASE form of the string.
+		 * @memberof XtraUtils.String#
+		 * @example
+		 * // returns 'my_cat'
+		 * let str = 'my cat';
+		 * str.to_snake_case();
+		 */
+		function TO_CONSTANT_CASE() {
+			return words( toUpperCase( this ) )
+				.join( '_' );
+		}
+		return TO_CONSTANT_CASE;
+	} )() );
+	XtraUtils.String.addUtil( 'to_seperated_case', ( function(){
+		/**
+		 * Converts the string to a seperated case, where the seperator is defined by the user.
+		 * @param {string} [seperator="-"] The seperator to seperate the string with.
+		 * @returns {string} The resulting seperated form of the string.
+		 * @memberof XtraUtils.String#
+		 * @example
+		 * // returns 'my-cat'
+		 * let str = 'my cat';
+		 * str.to-seperated-case();
+		 * @example
+		 * // returns 'my|cat'
+		 * let str = 'my cat';
+		 * str.to-seperated-case('|');
+		 */
+		function to_seperated_case( seperator = '-' ) {
+			return this.words()
+				.map( function( _ ){ return _.replace( /^./, function( match ) { return toLowerCase( match ); } );} )
+				.join( seperator );
+		}
+		return to_seperated_case;
+	} )() );
+	XtraUtils.String.addUtil( 'ToTitleCase', ( function(){
+		/**
+		 * Converts the string to a seperated case, where the seperator is defined by the user.
+		 * @returns {string} The resulting Title Case form of the string.
+		 * @memberof XtraUtils.String#
+		 * @example
+		 * // returns 'My Cat'
+		 * let str = 'my cat';
+		 * str.ToTitleCase();
+		 */
+		function ToTitleCase(){
+			return this.words()
+				.map( function( _ ){ return _.replace( /^./, function( match ){ return toUpperCase( match ); } );} )
+				.join( ' ' );
+		}
+		return ToTitleCase;
+	} )() );
+
+	XtraUtils.String.addUtil( 'repeat', ( function(){
+		/**
+		 * An extension of the native repeat, this one takes decimals as a parameter, and splits the string accordingly.
+		 * @param {number} times How many times to repeat the string. Splits string if it is a decimal.
+		 * @returns {string} The repeated string.
+		 * @memberof XtraUtils.String#
+		 * @example
+		 * // returns 'my catmy cat'
+		 * let str = 'my cat';
+		 * str.repeat(2);
+		 * @example
+		 * // returns 'my catmy '
+		 * let str = 'my cat';
+		 * str.repeat(1.5);
+		 */
+		function repeat( times ){
+			return somethinghacky.call( this, ceil( times ) ).slice( 0, round( times * this.length ) );
+		}
+		return repeat;
+	} )() );
+	XtraUtils.String.addUtil( 'padLeft', ( function(){
+		return function padLeft( len = this.length, char = ' ' ){
+			if( this.length >= len ){
+				return this;
+			}
+			return repeat( char, len - this.length ) + this;
+		};
+	} )() );
+	XtraUtils.String.addUtil( 'padRight', ( function(){
+		return function padRight( len, char ){
+			if( this.length >= len ){
+				return this;
+			}
+			char = char || ' ';
+			return this + repeat( char, len - this.length );
+		};
+	} )() );
+
+} else {
+	console.warn( 'XtraUtils is not defined. For more details, please visit ' +
+						   'https://github.com/FreezePhoenix/XtraUtils/. If your issue still occurs, submit an issue here:' +
+						   'https://github.com/FreezePhoenix/XtraUtils/issues/new' );
+}
+/**
+ * @callback CallBack
+ * @param {string} str The string being passed
+ * @returns {*}
+ * @memberof XtraUtils.String
+ */</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Branch.html">Branch</a></li><li><a href="Fragment.html">Fragment</a></li><li><a href="Leaf.html">Leaf</a></li><li><a href="Matrix.html">Matrix</a></li><li><a href="Pool.html">Pool</a></li><li><a href="Queue.html">Queue</a></li><li><a href="SealedArray.html">SealedArray</a></li><li><a href="SizeLimitedStack.html">SizeLimitedStack</a></li><li><a href="Stack.html">Stack</a></li><li><a href="Tree.html">Tree</a></li><li><a href="TypedSizeLimitedStack.html">TypedSizeLimitedStack</a></li><li><a href="TypedStack.html">TypedStack</a></li><li><a href="Vector.html">Vector</a></li><li><a href="XtraUtils.Utility.html">Utility</a></li></ul><h3>Namespaces</h3><ul><li><a href="Testers.html">Testers</a></li><li><a href="XtraUtils.html">XtraUtils</a></li><li><a href="XtraUtils.Array.html">Array</a></li><li><a href="XtraUtils.Boolean.html">Boolean</a></li><li><a href="XtraUtils.Function.html">Function</a></li><li><a href="XtraUtils.Number.html">Number</a></li><li><a href="XtraUtils.Object.html">Object</a></li><li><a href="XtraUtils.String.html">String</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sun Aug 19 2018 20:23:30 GMT+0500 (+05)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

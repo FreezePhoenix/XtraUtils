@@ -1,0 +1,17 @@
+{
+  "rules": {
+    "curly": ["error", "all"],
+    "semi-style": ["error", "last"],
+    "no-extra-semi": ["error"],
+    "semi": ["error", "always"],
+    "quotes": ["error", "single"],
+    "no-extra-parens": ["error", "all"],
+    "indent": ["error", 2],
+    "no-multi-spaces": ["error"],
+    "one-var": ["error", "consecutive"],
+    "no-trailing-spaces": ["error", { "skipBlankLines": false }]
+  },
+  "parserOptions": {
+    "ecmaVersion": 6
+  }
+}

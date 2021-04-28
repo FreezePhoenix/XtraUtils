@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: Stack.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: Stack.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>const [Stack, TypedStack, SizeLimitedStack] = ( function(){
+	/**
+	 * A class that represents a stack. When an item is added, it goes to the top. When an item is removed, it is removed from the top.
+	 * @class
+	 */
+	class Stack {
+		/**
+		 * @constructs Stack
+		 */
+		constructor() {
+			this.__elems__ = [];
+		}
+		/**
+		 * The number of items in the stack.
+		 */
+		get items() {
+    	return this.__elems__.length;
+		}
+		/**
+		 * Add an item to the stack.
+		 * @param {...*} items The items to add.
+		 * @returns {undefined}
+		 */
+		add( ...items ) {
+			this.__elems__.push( ...items );
+		}
+		/**
+		 * Remove an item from the stack.
+		 * @returns {*} The item.
+		 */
+		remove() {
+			return this.__elems__.pop();
+		}
+		*[Symbol.iterator]() {
+			while( this.items ) {
+    	  yield this.remove();
+    	}
+		}
+	}
+	/**
+    * A stack class that only allows only specific types.
+    * @class
+    * @extends Stack
+    */
+	class TypedStack extends Stack {
+		/**
+   	 * @constructs TypedStack
+   	 * @param {...Class} types The types to allow.
+   	 * @throws {TypeError} You provided an invalid type!
+   	 */
+		constructor( ...types ) {
+			if( types.all( ( type )=>typeof type === 'function' &amp;&amp; type.prototype ) ) {
+		      super();
+  				this.__types__ = types;
+    		} else {
+    	  		throw TypeError( 'TypedStack expects an array of types.' );
+    		}
+		}
+		/**
+    	 * Add an item to the stack. Throws a `TypeError` if it is not an instance of any of the types.
+       * @param {...*} items The items to add.
+       * @throws {TypeError} Invalid item provided.
+       * @returns {undefined}
+       */
+		add( ...items ) {
+			items.forEach( ( item, _ ) => {
+				if( this.__types__.some( type=>item instanceof type ) ) {
+					super.add( item );
+				} else {
+					throw TypeError( `Invalid item: ${item}` );
+				}
+			} );
+		}
+	}
+	/**
+	 * A stack class with limited size.
+	 * @class
+	 * @extends Stack
+	 */
+	class SizeLimitedStack extends Stack {
+		/**
+		 * @constructs SizeLimitedStack
+		 * @param {number} size The max on the number of items.
+		 */
+		constructor( size ) {
+		  super();
+		  this.__elems__ = Array( size ).fill();
+		}
+		/**
+		 * Add an item to the stack. Note: Items that are pushed off the front are lost.
+		 * @param {...*} items The items to add.
+		 * @returns {undefined}
+		 */
+		add( ...items ) {
+			items.forEach( ( item, _ ) => {
+			  super.add( item );
+			  this.__elems__.shift();
+			} );
+		}
+	}
+	/**
+	 * A stack thats with limited size and specific types.
+	 * @class
+	 * @extends Stack
+	 */
+	class TypedSizeLimitedStack extends Stack {
+		constructor( size, ...types ) {
+		  if( types.all( ( type )=>typeof type === 'function' &amp;&amp; type.prototype ) ) {
+		      super();
+  				this.__types__ = types;
+  				this.__elems__ = Array( size ).fill();
+    		} else {
+    	  		throw TypeError( 'TypedStack expects an array of types.' );
+    		}
+		}
+	}
+	return [Stack, TypedStack, SizeLimitedStack];
+} )();
+/**
+ * A constructor or class.
+ * @alias Type
+ * @typedef {function} Type
+ * @memberof TypedStack
+ */
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Branch.html">Branch</a></li><li><a href="Fragment.html">Fragment</a></li><li><a href="Leaf.html">Leaf</a></li><li><a href="Matrix.html">Matrix</a></li><li><a href="Pool.html">Pool</a></li><li><a href="Queue.html">Queue</a></li><li><a href="SealedArray.html">SealedArray</a></li><li><a href="SizeLimitedStack.html">SizeLimitedStack</a></li><li><a href="Stack.html">Stack</a></li><li><a href="Tree.html">Tree</a></li><li><a href="TypedSizeLimitedStack.html">TypedSizeLimitedStack</a></li><li><a href="TypedStack.html">TypedStack</a></li><li><a href="Vector.html">Vector</a></li><li><a href="XtraUtils.Utility.html">Utility</a></li></ul><h3>Namespaces</h3><ul><li><a href="Testers.html">Testers</a></li><li><a href="XtraUtils.html">XtraUtils</a></li><li><a href="XtraUtils.Array.html">Array</a></li><li><a href="XtraUtils.Boolean.html">Boolean</a></li><li><a href="XtraUtils.Function.html">Function</a></li><li><a href="XtraUtils.Number.html">Number</a></li><li><a href="XtraUtils.Object.html">Object</a></li><li><a href="XtraUtils.String.html">String</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sun Aug 19 2018 20:23:30 GMT+0500 (+05)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
